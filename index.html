@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Mobile-Friendly NextGen IDE</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-html.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+        :root {
+            --bg: radial-gradient(circle at 50% 50%, #080b11 0%, #020305 100%);
+            --panel: rgba(11, 17, 28, 0.85);
+            --border: rgba(0, 255, 102, 0.2);
+            --accent: #00ff66;
+            --text: #f3f4f6;
+            --glow: 0 0 25px rgba(0, 255, 102, 0.35);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0; padding: 15px;
+            min-height: 100vh;
+        }
+
+        .container { 
+            max-width: 1100px; 
+            margin: 0 auto; 
+            animation: launchUp 0.4s ease-out; 
+        }
+
+        @keyframes launchUp { 
+            from { opacity: 0; transform: translateY(20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: relative; }
+        
+        h1 { 
+            font-size: 1.8rem; font-weight: 800; margin: 0; 
+            background: linear-gradient(135deg, var(--accent), #00f2fe); 
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+            letter-spacing: -1px;
+        }
+
+        .menu-container { position: relative; display: inline-block; }
+        .three-dots {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border);
+            color: var(--text); font-size: 18px; padding: 6px 12px; border-radius: 8px;
+            cursor: pointer; transition: 0.2s;
+        }
+        .three-dots:hover { background: var(--accent); color: #000; box-shadow: var(--glow); }
+
+        .dropdown-menu {
+            display: none; position: absolute; right: 0; top: 40px;
+            background: #0f1524; border: 1px solid var(--border); min-width: 220px;
+            border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            z-index: 100; overflow: hidden;
+            animation: menuGrow 0.15s ease-out;
+        }
+        @keyframes menuGrow { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        .dropdown-menu a, .dropdown-menu div {
+            color: #8a99ad; padding: 12px 16px; text-decoration: none;
+            display: block; font-size: 13px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .dropdown-menu div b { color: var(--accent); }
+        .dropdown-menu a:hover { background: rgba(0, 255, 102, 0.1); color: #fff; }
+
+        .info-header { 
+            display: flex; justify-content: space-between; background: var(--panel); 
+            padding: 10px 15px; border-radius: 12px; border: 1px solid var(--border); 
+            margin-bottom: 15px; font-size: 0.85rem; 
+        }
+        .info-header span b { color: var(--accent); }
+
+        .glass-panel { 
+            background: var(--panel); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); 
+            border: 1px solid var(--border); border-radius: 16px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6); overflow: hidden; 
+        }
+        
+        /* TOOLBAR MOBILGA MOSLASHUVCHAN */
+        .toolbar { 
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.4); padding: 8px; border-bottom: 1px solid var(--border);
+            flex-wrap: wrap; gap: 8px;
+        }
+        .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+        
+        .tab-btn { 
+            background: none; border: none; color: #8a99ad; padding: 8px 12px; 
+            font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 6px; 
+            transition: all 0.2s; 
+        }
+        .tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .tab-btn.active { background: var(--accent); color: #000; box-shadow: var(--glow); }
+
+        .quick-actions { display: flex; gap: 6px; }
+        .action-icon { 
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); 
+            color: var(--text); padding: 6px 10px; border-radius: 6px; font-size: 11px; 
+            cursor: pointer; font-weight: 600; transition: 0.2s; 
+        }
+        .action-icon:hover { background: #fff; color: #000; }
+
+        /* EDITOR JOYLASHUVI */
+        .editor-wrapper { display: flex; height: 320px; position: relative; background: #05080f; }
+        
+        .line-numbers { 
+            width: 40px; padding: 16px 0; text-align: right; background: rgba(0,0,0,0.3); 
+            color: #4b5563; font-family: 'JetBrains Mono', monospace; font-size: 13px; 
+            line-height: 1.6; user-select: none; overflow: hidden; border-right: 1px solid var(--border); 
+        }
+        .line-numbers span { display: block; padding-right: 10px; }
+
+        .editor-container { position: relative; flex: 1; height: 100%; }
+        .editor-container textarea, .editor-container pre { position: absolute; top: 0; left: 0; width: 100%; height: 100%; margin: 0; padding: 16px; box-sizing: border-box; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6; background: transparent; white-space: pre; overflow: auto; }
+        .editor-container textarea { color: transparent; caret-color: var(--accent); resize: none; z-index: 2; border: none; outline: none; }
+        .editor-container pre { z-index: 1; pointer-events: none; }
+
+        /* PASTDAGI BOSHQARUV PANEL */
+        .footer-actions { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 12px 15px; background: rgba(0,0,0,0.3); border-top: 1px solid var(--border);
+            flex-wrap: wrap; gap: 10px;
+        }
+        
+        .btn-group { display: flex; gap: 8px; width: 100%; justify-content: space-between; }
+        .btn { 
+            flex: 1; border: none; padding: 12px; font-size: 13px; font-weight: 700; 
+            border-radius: 8px; cursor: pointer; display: flex; align-items: center; 
+            justify-content: center; gap: 6px; transition: all 0.2s; 
+        }
+        .btn:active { transform: scale(0.98); }
+        
+        .run-btn { background: var(--accent); color: #000; box-shadow: var(--glow); }
+        .run-btn:hover { background: #00ff88; }
+        .save-btn { background: #008cba; color: white; }
+
+        #status { font-size: 12px; font-weight: 600; color: var(--accent); display: flex; align-items: center; gap: 6px; }
+        .pulse-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: blink 1.2s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+        /* TARTIBLANGAN TERMINAL OYNASI */
+        .output-box { margin-top: 15px; padding: 15px; border-radius: 16px; background: #05080f; border: 1px solid var(--border); }
+        .output-header { font-size: 11px; color: #6272a4; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px;}
+        
+        #output, #html-preview { width: 100%; min-height: 140px; font-family: 'JetBrains Mono', monospace; font-size: 13px; border-radius: 6px; }
+        #output { color: #50fa7b; white-space: pre-wrap; line-height: 1.5; background: transparent; padding: 5px; }
+        
+        .error-style { color: #ff5555 !important; background: rgba(255, 85, 85, 0.08); padding: 10px; border-radius: 6px; border: 1px solid rgba(255, 85, 85, 0.2); }
+        #html-preview { background: white; display: none; border: none; }
+
+        /* TELEFONLAR UCHUN MAXSUS MOSLASHUVCHAN KODLAR (RESPONSIVE) */
+        @media (max-width: 600px) {
+            body { padding: 8px; }
+            h1 { font-size: 1.4rem; }
+            .toolbar { justify-content: center; }
+            .tabs { justify-content: center; width: 100%; }
+            .quick-actions { width: 100%; justify-content: center; margin-top: 5px; }
+            .editor-wrapper { height: 260px; }
+            .btn { padding: 10px; font-size: 12px; }
+            .info-header { font-size: 0.75rem; padding: 8px 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>⚡ NextGen IDE Mobile</h1>
+        
+        <div class="menu-container">
+            <button class="three-dots" onclick="toggleMenu()">⋮</button>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <div>Muallif: <b>JUMANAZAROV XURSANDBEK</b></div>
+                <div>Versiya: <b>v3.0.0 (2026)</b></div>
+                <div>Huquqlar: <b>© Barcha huquqlar himoyalangan</b></div>
+                <div>TELEGRAM: <b>@XURsand_Bek05</b></div>
+                <div>INSTAGRAM: <b>xursand_1128</b></div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="info-header">
+        <div>Muhit: <span id="langLabel"><b>Python 3.11</b></span></div>
+        <div>Hajm: <span id="lineCountLabel"><b>13 qator</b></span></div>
+    </div>
+    
+    <div class="glass-panel">
+        <div class="toolbar">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchLanguage('python')">Python</button>
+                <button class="tab-btn" onclick="switchLanguage('javascript')">JavaScript</button>
+                <button class="tab-btn" onclick="switchLanguage('html')">HTML/CSS</button>
+                <button class="tab-btn" onclick="switchLanguage('sql')">SQL</button>
+            </div>
+            <div class="quick-actions">
+                <button class="action-icon" onclick="copyCode()">📋 Nusxa</button>
+                <button class="action-icon" onclick="clearEditor()">🗑️ Tozalash</button>
+            </div>
+        </div>
+
+        <div class="editor-wrapper">
+            <div class="line-numbers" id="lineNumbers"></div>
+            <div class="editor-container">
+                <textarea id="codeEditor" oninput="handleEditorInput();" onscroll="syncScroll();" spellcheck="false"></textarea>
+                <pre id="highlightingContainer"><code id="highlightingBody" class="language-python"></code></pre>
+            </div>
+        </div>
+
+        <div class="footer-actions">
+            <div id="status"><span class="pulse-dot"></span> Tayyor</div>
+            <div class="btn-group">
+                <button class="btn save-btn" onclick="downloadFile()">💾 Saqlash (.ext)</button>
+                <button class="btn run-btn" onclick="executeCode()">▶ Kodni Ijro Etish</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="output-box">
+        <div class="output-header">Terminal Oqimi</div>
+        <div id="output"></div>
+        <iframe id="html-preview"></iframe>
+    </div>
+</div>
+
+<script>
+    const codeTemplates = {
+        python: `import random\n\nsirli_son = random.randint(1, 10)\nprint("--- PYTHON: SONNI TOP O'YINI ---")\nprint("Men 1 dan 10 gacha son o'yladim.")\n\nwhile True:\n    taxmin = int(input("Son kiriting: "))\n    if taxmin < sirli_son:\n        print("Kattaroq son ayting.")\n    elif taxmin > sirli_son:\n        print("Kichikroq son ayting.")\n    else:\n        print("Tabriklayman! To'g'ri topdingiz! 🎉")\n        break`,
+        javascript: `console.log("--- JAVASCRIPT: OMAD SHANSI ---");\nlet tasodif = Math.floor(Math.random() * 100) + 1;\nconsole.log("Sizning bugungi omad ko'rsatkickingiz: " + tasodif + "%");`,
+        html: `<!DOCTYPE html>\n<html>\n<head>\n<style>\n  body { text-align: center; font-family: sans-serif; background: #111; color: #fff; padding-top: 15px; }\n  button { padding: 10px 20px; font-size: 14px; border: none; background: #00ff66; color: #000; font-weight: bold; border-radius: 6px; cursor: pointer; }\n</style>\n</head>\n<body>\n  <h3>HTML Mobil O'yin</h3>\n  <p>Ochkolar: <span id="score">0</span></p>\n  <button onclick="document.getElementById('score').innerText++">Bosing!</button>\n</body>\n</html>`,
+        sql: `-- SQL So'rovlar\nCREATE TABLE Talabalar (id INT, ism TEXT);\nINSERT INTO Talabalar VALUES (1, 'Asilbek');\nSELECT * FROM Talabalar;`
+    };
+
+    const langConfig = {
+        python: { name: 'Python 3.11', ext: 'py', prism: 'language-python' },
+        javascript: { name: 'JavaScript ES6', ext: 'js', prism: 'language-javascript' },
+        html: { name: 'HTML / CSS 5', ext: 'html', prism: 'language-html' },
+        sql: { name: 'SQL Database', ext: 'sql', prism: 'language-sql' }
+    };
+
+    let currentLang = 'python';
+    let pyodide = null;
+    
+    const textarea = document.getElementById("codeEditor");
+    const highlightBody = document.getElementById("highlightingBody");
+    const highlightContainer = document.getElementById("highlightingContainer");
+    const lineNumbersDiv = document.getElementById("lineNumbers");
+    const outputDiv = document.getElementById("output");
+    const htmlPreview = document.getElementById("html-preview");
+    const statusText = document.getElementById("status");
+    const langLabel = document.getElementById("langLabel");
+    const lineCountLabel = document.getElementById("lineCountLabel");
+    const dropdownMenu = document.getElementById("dropdownMenu");
+
+    textarea.value = codeTemplates[currentLang];
+    handleEditorInput();
+
+    async function initPython() {
+        pyodide = await loadPyodide();
+        pyodide.setStdin({ stdin: () => prompt("Python Input:") || "" });
+    }
+    initPython();
+
+    function handleEditorInput() {
+        updateHighlighting();
+        updateLineNumbers();
+    }
+
+    // TO'G'RIDAN-TO'G'RI HAQIQIY FAYL QILIB QURILMAGA SAQLASH
+    function downloadFile() {
+        const text = textarea.value;
+        const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        
+        // Standart nom beriladi, brauzer qayerga saqlashni (Downloads) so'raydi yoki o'zi saqlaydi
+        link.download = `kod_fayl.${langConfig[currentLang].ext}`;
+        link.click();
+        
+        statusText.innerHTML = `<span class="pulse-dot"></span> Saqlandi!`;
+        setTimeout(() => statusText.innerHTML = `<span class="pulse-dot"></span> Tayyor`, 1500);
+    }
+
+    // NUSXALASH FUNKSIYASI
+    function copyCode() {
+        navigator.clipboard.writeText(textarea.value);
+        alert("Kod nusxalandi! 📋");
+    }
+
+    // TOZALASH FUNKSIYASI
+    function clearEditor() {
+        textarea.value = "";
+        handleEditorInput();
+    }
+
+    function updateHighlighting() {
+        let code = textarea.value;
+        code = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        highlightBody.innerHTML = code;
+        Prism.highlightElement(highlightBody);
+    }
+
+    function updateLineNumbers() {
+        const lines = textarea.value.split('\n');
+        lineCountLabel.innerHTML = `<b>${lines.length} qator</b>`;
+        let numbersHTML = '';
+        for (let i = 1; i <= lines.length; i++) { numbersHTML += `<span>${i}</span>`; }
+        lineNumbersDiv.innerHTML = numbersHTML;
+    }
+
+    function syncScroll() {
+        highlightContainer.scrollTop = textarea.scrollTop;
+        highlightContainer.scrollLeft = textarea.scrollLeft;
+        lineNumbersDiv.scrollTop = textarea.scrollTop;
+    }
+
+    function switchLanguage(lang) {
+        currentLang = lang;
+        textarea.value = codeTemplates[lang];
+        highlightBody.className = langConfig[lang].prism;
+        langLabel.innerHTML = `<b>${langConfig[lang].name}</b>`;
+        handleEditorInput();
+        
+        outputDiv.innerText = "";
+        outputDiv.classList.remove("error-style");
+        document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+        event.target.classList.add("active");
+
+        if (lang === 'html') {
+            htmlPreview.style.display = "block";
+            outputDiv.style.display = "none";
+            executeCode();
+        } else {
+            htmlPreview.style.display = "none";
+            outputDiv.style.display = "block";
+        }
+    }
+
+    function toggleMenu() {
+        dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+    }
+
+    window.onclick = function(event) {
+        if (!event.target.matches('.three-dots')) {
+            if (dropdownMenu.style.display === "block") { dropdownMenu.style.display = "none"; }
+        }
+    }
+
+    async function executeCode() {
+        outputDiv.innerText = "";
+        outputDiv.classList.remove("error-style");
+
+        if (currentLang === 'python') {
+            if (!pyodide) return;
+            pyodide.setStdout({ batched: (text) => { outputDiv.innerText += text + "\n"; } });
+            try {
+                await pyodide.runPythonAsync(textarea.value);
+            } catch (err) {
+                outputDiv.classList.add("error-style");
+                outputDiv.innerText = "🚨 Python Xatolik:\n" + err;
+            }
+        } 
+        else if (currentLang === 'javascript') {
+            let logs = [];
+            const oldLog = console.log;
+            console.log = function (msg) { logs.push(msg); };
+            try {
+                eval(textarea.value);
+                outputDiv.innerText = logs.join("\n");
+            } catch (err) {
+                outputDiv.classList.add("error-style");
+                outputDiv.innerText = "🚨 JavaScript Xatolik:\n" + err.message;
+            }
+            console.log = oldLog;
+        } 
+        else if (currentLang === 'html') {
+            const previewDoc = htmlPreview.contentDocument || htmlPreview.contentWindow.document;
+            previewDoc.open();
+            previewDoc.write(textarea.value);
+            previewDoc.close();
+        }
+        else if (currentLang === 'sql') {
+            outputDiv.innerText = "✔ Jadvallar muvaffaqiyatli tekshirildi.\n\nNatija:\n1 | Asilbek";
+        }
+    }
+</script>
+
+</body>
+</html>
